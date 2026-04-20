@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>은결 ♡ 수한 — Wedding Gallery</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #faf7f4;
+    font-family: Georgia, 'Times New Roman', serif;
+    color: #4a3728;
+  }
+
+  /* ── Header ── */
+  .header {
+    text-align: center;
+    padding: 56px 20px 40px;
+    border-bottom: 0.5px solid #ddd0bc;
+  }
+  .header .label {
+    font-size: 11px;
+    letter-spacing: 6px;
+    color: #b8956a;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .header h1 {
+    font-size: 32px;
+    font-weight: 400;
+    letter-spacing: 3px;
+    color: #3d2b1f;
+    margin-bottom: 10px;
+  }
+  .header .date {
+    font-size: 13px;
+    letter-spacing: 4px;
+    color: #9a7a5a;
+  }
+  .divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 16px auto 0;
+  }
+  .divider-line { width: 60px; height: 0.5px; background: #c9a97a; }
+  .divider-diamond {
+    width: 6px; height: 6px;
+    background: #c9a97a;
+    transform: rotate(45deg);
+  }
+
+  /* ── Grid ── */
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    padding: 32px 24px 48px;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+  @media (max-width: 600px) {
+    .gallery { grid-template-columns: repeat(2, 1fr); gap: 4px; padding: 20px 12px 36px; }
+  }
+
+  .photo-wrap {
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    border-radius: 4px;
+  }
+  .photo-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.35s ease;
+  }
+  .photo-wrap:hover img { transform: scale(1.06); }
+  .photo-wrap .hover-overlay {
+    position: absolute; inset: 0;
+    background: rgba(60, 35, 15, 0);
+    transition: background 0.3s ease;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .photo-wrap:hover .hover-overlay { background: rgba(60, 35, 15, 0.15); }
+  .hover-overlay svg { opacity: 0; transition: opacity 0.3s; }
+  .photo-wrap:hover .hover-overlay svg { opacity: 1; }
+
+  /* ── Lightbox ── */
+  .lightbox {
+    display: none;
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(20, 12, 6, 0.92);
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .lightbox.open { display: flex; }
+
+  .lb-inner {
+    position: relative;
+    max-width: 90vw;
+    max-height: 88vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .lb-inner img {
+    max-width: 100%;
+    max-height: 88vh;
+    object-fit: contain;
+    border-radius: 4px;
+    display: block;
+  }
+
+  /* nav arrows */
+  .lb-btn {
+    position: fixed;
+    top: 50%; transform: translateY(-50%);
+    background: rgba(255,255,255,0.12);
+    border: 0.5px solid rgba(255,255,255,0.25);
+    border-radius: 50%;
+    width: 48px; height: 48px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+    z-index: 1001;
+  }
+  .lb-btn:hover { background: rgba(255,255,255,0.22); }
+  .lb-prev { left: 20px; }
+  .lb-next { right: 20px; }
+
+  /* close */
+  .lb-close {
+    position: fixed;
+    top: 20px; right: 24px;
+    background: none; border: none;
+    cursor: pointer;
+    color: rgba(255,255,255,0.7);
+    font-size: 28px;
+    line-height: 1;
+    z-index: 1001;
+    transition: color 0.2s;
+  }
+  .lb-close:hover { color: #fff; }
+
+  /* counter */
+  .lb-counter {
+    position: fixed;
+    bottom: 24px; left: 50%; transform: translateX(-50%);
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: rgba(255,255,255,0.5);
+    font-family: Georgia, serif;
+    z-index: 1001;
+  }
+
+  /* footer */
+  .footer {
+    text-align: center;
+    padding: 24px 20px 48px;
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: #b8956a;
+    border-top: 0.5px solid #ddd0bc;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <p class="label">✦ Gallery ✦</p>
+  <h1>정은결  ♡  우수한</h1>
+  <p class="date">2026 · 05 · 24  SUN  PM 1:00</p>
+  <div class="divider">
+    <div class="divider-line"></div>
+    <div class="divider-diamond"></div>
+    <div class="divider-line"></div>
+  </div>
+</div>
+
+<div class="gallery" id="gallery">
+</div>
+
+<div class="footer">노블발렌티 삼성  ·  서울 강남구 봉은사로 637</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox">
+  <button class="lb-close" id="lb-close">✕</button>
+  <button class="lb-btn lb-prev" id="lb-prev">
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+      <path d="M11 3.5L6 9l5 5.5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+  <div class="lb-inner">
+    <img id="lb-img" src="" alt="">
+  </div>
+  <button class="lb-btn lb-next" id="lb-next">
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+      <path d="M7 3.5L12 9l-5 5.5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+  <div class="lb-counter" id="lb-counter">1 / 18</div>
+</div>
+
+<script>
+const base = "https://mcard-resources.barunsoncard.com/upload/invitation/260414/1180618/gallery/";
+const photos = [
+  "93bb1f80-5ebe-44f3-a61f-97800b412d4e.jpg",
+  "2516fc84-ed3a-4710-b370-42903507b87e.jpg",
+  "fd0a9312-a7f6-4392-82bc-c1c431cce220.jpg",
+  "62a4993d-4d3a-46b0-9bf6-d4cbc8576534.jpg",
+  "3460a451-2bea-467d-ae73-7ad4ac3686b6.jpg",
+  "4189ed95-3201-4d03-9916-424b3fbb2344.jpg",
+  "81f12f7f-562a-4c4c-9a82-3ed2e23bc0cb.jpg",
+  "5297225b-441c-421f-a5ab-7d4d3e400ae0.jpg",
+  "2e9974b3-6f67-4267-8472-eb3ec8cc9fc0.jpg",
+  "bb1c830f-3f94-4886-8038-4a22d79d10f6.jpg",
+  "7614b918-6ea9-4e17-a025-e0ba3b79a889.jpg",
+  "09ce045c-9618-4ada-9a13-704f5321518f.jpg",
+  "95944bd0-ea26-43de-b5d4-caaf3851ea8d.jpg",
+  "41d0f9dd-c4eb-4c61-9042-01bcade20891.jpg",
+  "0072309b-b35a-41e3-a275-9be0c83546f2.jpg",
+  "6cd434e6-42be-4536-b654-228693794574.jpg",
+  "c72511d0-707e-4258-ac53-8ba5036b0e0e.jpg",
+  "4d3eb8ea-6609-43ca-9fe4-a6375667107a.jpg"
+];
+
+const gallery = document.getElementById("gallery");
+const lightbox = document.getElementById("lightbox");
+const lbImg    = document.getElementById("lb-img");
+const lbCounter= document.getElementById("lb-counter");
+let current = 0;
+
+photos.forEach((p, i) => {
+  const wrap = document.createElement("div");
+  wrap.className = "photo-wrap";
+
+  const img = document.createElement("img");
+  img.src = base + p;
+  img.alt = "웨딩 사진 " + (i + 1);
+  img.loading = "lazy";
+
+  const overlay = document.createElement("div");
+  overlay.className = "hover-overlay";
+  overlay.innerHTML = `<svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+    <circle cx="12" cy="12" r="7" stroke="white" stroke-width="1.2"/>
+    <path d="M17.5 17.5L23 23" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
+    <path d="M9 12h6M12 9v6" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
+  </svg>`;
+
+  wrap.appendChild(img);
+  wrap.appendChild(overlay);
+  wrap.addEventListener("click", () => openLb(i));
+  gallery.appendChild(wrap);
+});
+
+function openLb(i) {
+  current = i;
+  lbImg.src = base + photos[i];
+  lbCounter.textContent = (i + 1) + " / " + photos.length;
+  lightbox.classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+
+function closeLb() {
+  lightbox.classList.remove("open");
+  document.body.style.overflow = "";
+}
+
+function prev() { openLb((current - 1 + photos.length) % photos.length); }
+function next() { openLb((current + 1) % photos.length); }
+
+document.getElementById("lb-close").addEventListener("click", closeLb);
+document.getElementById("lb-prev").addEventListener("click", prev);
+document.getElementById("lb-next").addEventListener("click", next);
+lightbox.addEventListener("click", e => { if (e.target === lightbox) closeLb(); });
+document.addEventListener("keydown", e => {
+  if (!lightbox.classList.contains("open")) return;
+  if (e.key === "ArrowLeft") prev();
+  else if (e.key === "ArrowRight") next();
+  else if (e.key === "Escape") closeLb();
+});
+</script>
+</body>
+</html>
